@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import Home from '@arcgis/core/widgets/Home';
 import BasemapToggle from '@arcgis/core/widgets/BasemapToggle';
-import Bookmarks from '@arcgis/core/widgets/Bookmarks';
 
 const MapWidgets = ({ view,bookmarks }) => {
   useEffect(() => {
@@ -11,20 +10,13 @@ const MapWidgets = ({ view,bookmarks }) => {
       }),
       'top-left'
     );
-   const BookmarksV= new Bookmarks({
-      view: view,
-      editingEnabled: true,
-       bookmarks:bookmarks
-    })
-    // view.ui.add(
-    //   new BasemapToggle({
-    //     view: view,
-    //     nextBasemap: 'topo',
-    //   }),
-    //   'bottom-left'
-    // );
-          view.ui.add(BookmarksV ,'top-right');
-
+    view.ui.add(
+      new BasemapToggle({
+        view: view,
+        nextBasemap: 'topo',
+      }),
+      'bottom-left'
+    );
   }, []);
 
   return null;

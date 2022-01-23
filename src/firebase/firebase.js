@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { nowTime, getDurationByMill } from "../util/datetimeUtil";
-import { BlockTimeInMill } from "../util/helper"; 
+import { BlockTimeInMill } from "../util/helper";
 import {
   GoogleAuthProvider,
   getAuth,
@@ -18,6 +18,7 @@ import {
   orderBy,
   where,
   addDoc,
+  setDoc,
   doc,
   deleteDoc
 } from "firebase/firestore";
@@ -80,13 +81,11 @@ const CheckIsBlocked = async (email) => {
 
   if (userLogsDoc.docs.length > 2) {
     const lastFailedTime = userLogsDoc.docs[0].data().time
-    const duration = BlockTimeInMill-getDurationByMill(lastFailedTime)
-    if (duration > 1){ return duration}
-    else{
-      console.log(userLogsDoc.docs)
-
-    const y= await userLogsDoc.forEach(item => {
-       deleteDoc(doc(db, "usersLogs",item.id ));         
+    const duration = BlockTimeInMill - getDurationByMill(lastFailedTime)
+    if (duration > 1) { return duration }
+    else {
+      const y = await userLogsDoc.forEach(item => {
+        deleteDoc(doc(db, "usersLogs", item.id));
       });
     }
   }
@@ -100,16 +99,38 @@ const HandleFailedLoginLogs = async (email) => {
     time: now
   });
 }
-const getBookmarks=async(email)=>{
+const getBookmarks = async (email) => {
   const q = query(collection(db, "bookmarks"), where("email", "==", email));
   const bookmarksDocs = await getDocs(q);
-  return bookmarksDocs.docs
+  return bookmarksDocs.docs.map(doc => doc.data().bookmark)
 }
-const addBookmark = async (bookmark, email) => {
+const removeBookmark=async(email,bookmarkName)=>{
+  const q = query(collection(db, "bookmarks"), where("email", "==", email), where("bookmark.name", "==", bookmarkName));
+  const bookmarksDocs = await getDocs(q);
+  bookmarksDocs.forEach(item => {
+    deleteDoc(doc(db, "bookmarks", item.id));
+  });
+}
+const updateBookmark=async(email,oldName,newName)=>{
+  const q = query(collection(db, "bookmarks"), where("email", "==", email), where("bookmark.name", "==", oldName));
+  const bookmarksDocs = await getDocs(q);
+  bookmarksDocs.forEach(item => {
+     setDoc(doc(db, "bookmarks", item.id), {
+      ...item,
+      bookmark:{
+        ...item.bookmark,
+           name:newName,
+      }
+   
+    });
+  });
+
+}
+const addBookmark = async (email,bookmark) => {
   try {
     await addDoc(collection(db, "bookmarks"), {
       email,
-      ...bookmark
+      bookmark
     });
     return true
   } catch (err) {
@@ -137,10 +158,10 @@ const registerWithEmailAndPassword = async (username, email, password) => {
   } catch (err) {
     switch (err.message) {
       case 'Firebase: Error (auth/email-already-in-use).':
-        alert ("email already in use")
-      break;
-    default:
-      break;
+        alert("email already in use")
+        break;
+      default:
+        break;
     }
     return false
   }
@@ -167,5 +188,6 @@ export {
   CheckIsBlocked,
   getBookmarks,
   addBookmark,
+  removeBookmark,
   logout,
 };

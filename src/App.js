@@ -1,25 +1,32 @@
-import logo from './logo.svg';
-import './App.css';
+import {    Routes,  Route} from "react-router-dom";
+import SignIn from "./components/Auth/SignIn"
+import SignUp from "./components/Auth/SignUp"
+import Home from "./components/Home/Home"
+import AppContext from './components/Context/AppContext';
+import React, { useEffect, useState } from "react";
+import Blocked from "./components/Auth/Blocked";
+import { useLoading } from 'react-hook-loading'
 
-function App() {
+export default function App(){
+  const [blockedTime, setBlockedTime] = useState(0);
+  const [loading, setLoading] = useLoading()
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+<AppContext.Provider
+      value={{
+        blockedTime,
+        setBlockedTime,
+        loading,
+        setLoading
+      }}
+    >
+    <Routes>
+      <Route path='/' element ={<Home/>}/>
+      <Route path='/SignIn' element ={<SignIn/>}/>
+      <Route path='/SignUp' element ={<SignUp/>}/>
+      <Route path='/Blocked' element ={<Blocked/>}/>
+    </Routes>  
+ </AppContext.Provider>
 
-export default App;
+  )
+}
